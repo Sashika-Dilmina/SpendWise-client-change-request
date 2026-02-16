@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
+import { StatsContext } from '../../context/StatsContext';
 import { useUserAuth } from '../../hooks/useUserAuth';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import toast from 'react-hot-toast';
@@ -11,24 +12,25 @@ import ExpenseList from '../../components/Expense/ExpenseList';
 import DeleteAlert from '../../components/DeleteAlert';
 
 function Expense() {
-   useUserAuth();
+  useUserAuth();
+  const { refreshStats } = useContext(StatsContext);
 
-   const [expenseData, setExpenseData] = useState([]);
-     const [loading, setLoading] = useState(false);
-     const [openDeleteAlert, setOpenDeleteAlert] = useState({
-       show: false,
-       data:null,
-   
-     });
-     const [OpenAddExpenseModal,setOpenAddExpenseModal] = useState(false)
-   
-       // Get All Expense Details
+  const [expenseData, setExpenseData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [openDeleteAlert, setOpenDeleteAlert] = useState({
+    show: false,
+    data: null,
+
+  });
+  const [OpenAddExpenseModal, setOpenAddExpenseModal] = useState(false)
+
+  // Get All Expense Details
   const fetchExpenseDetails = async () => {
-    if (loading) return ;
+    if (loading) return;
 
     setLoading(true);
 
-    try{
+    try {
       const response = await axiosInstance.get(
         `${API_PATHS.EXPENSE.GET_ALL_EXPENSE}`
       );
@@ -44,20 +46,20 @@ function Expense() {
 
   // Handle Add Expense
   const handleAddExpense = async (expense) => {
-    const {category, amount, date, icon } = expense;
+    const { category, amount, date, icon } = expense;
 
     // Validation Check
-    if(!category.trim()) {
+    if (!category.trim()) {
       toast.error("Category is required.");
       return;
     }
 
-    if(!amount || isNaN(amount) || Number(amount) <= 0){
+    if (!amount || isNaN(amount) || Number(amount) <= 0) {
       toast.error("Amount should be a valid number greater than 0.")
       return;
     }
 
-    if (!date){
+    if (!date) {
       toast.error("Date is required.");
       return;
     }
@@ -68,32 +70,34 @@ function Expense() {
         amount,
         date,
         icon,
-      }); 
+      });
 
       setOpenAddExpenseModal(false);
       toast.success("Expense added successfully");
       fetchExpenseDetails();
+      refreshStats();
 
-    } catch (error){
+    } catch (error) {
       console.error(
         "Error adding expense:",
         error.response?.date?.message || error.message
       );
     }
-  } ;
+  };
 
-    // Delete Expense
+  // Delete Expense
   const deleteExpense = async (id) => {
-    try{
+    try {
       await axiosInstance.delete(API_PATHS.EXPENSE.DELETE_EXPENSE(id));
-      setOpenDeleteAlert({show: false, data: null});
+      setOpenDeleteAlert({ show: false, data: null });
       toast.success("Expense details deleted successfully");
       fetchExpenseDetails();
+      refreshStats();
 
-    } catch (error){
+    } catch (error) {
       console.error(
-      "Error deleting expense:",
-      error.response?.data?.message || error.message
+        "Error deleting expense:",
+        error.response?.data?.message || error.message
       );
     };
   };
@@ -125,12 +129,12 @@ function Expense() {
 
   useEffect(() => {
     fetchExpenseDetails()
-  
+
     return () => {
-     
+
     }
   }, [])
-  
+
 
 
   return (
@@ -141,39 +145,39 @@ function Expense() {
             <ExpenseOverview
               transactions={expenseData}
               onExpenseIncome={() => setOpenAddExpenseModal(true)}
-              />
+            />
           </div>
 
           <ExpenseList
-            transactions = {expenseData}
-            onDelete = {(id) => {
+            transactions={expenseData}
+            onDelete={(id) => {
               setOpenDeleteAlert({ show: true, data: id });
 
             }}
             onDownload={handleDownloadExpenseDetails}
-            />
+          />
         </div>
 
-        <Modal 
+        <Modal
           isOpen={OpenAddExpenseModal}
           onClose={() => setOpenAddExpenseModal(false)}
           title="Add Expense"
-          >
-            <AddExpenseForm onAddExpense={handleAddExpense}/>
-          </Modal>
+        >
+          <AddExpenseForm onAddExpense={handleAddExpense} />
+        </Modal>
 
-           <Modal
-            isOpen={openDeleteAlert.show}
-            onClose={()=> setOpenDeleteAlert({ show: false, data: null})}
-            title="Delete Expense"
-            >
-              <DeleteAlert
-                content = "Are you sure you want to delte this expense detail?"
-                onDelete={() => deleteExpense(openDeleteAlert.data)}
-                />
-          </Modal>
-        </div>
-        </DashboardLayout>
+        <Modal
+          isOpen={openDeleteAlert.show}
+          onClose={() => setOpenDeleteAlert({ show: false, data: null })}
+          title="Delete Expense"
+        >
+          <DeleteAlert
+            content="Are you sure you want to delte this expense detail?"
+            onDelete={() => deleteExpense(openDeleteAlert.data)}
+          />
+        </Modal>
+      </div>
+    </DashboardLayout>
   )
 }
 

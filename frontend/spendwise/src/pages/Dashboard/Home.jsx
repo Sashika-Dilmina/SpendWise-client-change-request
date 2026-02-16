@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosinstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import InfoCard from '../../components/Cards/InfoCard';
-import { LuAlertTriangle, LuHandCoins, LuWalletMinimal } from 'react-icons/lu';
+import { LuTriangleAlert, LuHandCoins, LuWalletMinimal } from 'react-icons/lu';
 import { IoMdCard } from "react-icons/io";
 import { addThousandsSeparator } from '../../utils/helper';
 import RecentTransactions from '../../components/Dashboard/RecentTransactions';
@@ -56,14 +56,6 @@ const Home = () => {
   return (
     <DashboardLayout activeMenu="Dashboard">
       <div className='my-5 mx-auto'>
-        {dashboarData?.isExpenseExceeded && (
-          <Alert
-            message="Your expense amount has exceeded your income amount"
-            type="error"
-            icon={LuAlertTriangle}
-          />
-        )}
-
         <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
           <InfoCard
             icon={<IoMdCard />}
