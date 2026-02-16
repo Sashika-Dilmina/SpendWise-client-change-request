@@ -63,12 +63,15 @@ exports.getDashboardData = async (req, res) => {
       })),
     ].sort((a, b) => b.date - a.date);
 
+    const totalIncomeAmount = totalIncome[0]?.total || 0;
+    const totalExpenseAmount = totalExpense[0]?.total || 0;
+
     // Final Response
     res.json({
-      totalBalance:
-        (totalIncome[0]?.total || 0) - (totalExpense[0]?.total || 0),
-      totalIncome: totalIncome[0]?.total || 0,
-      totalExpenses: totalExpense[0]?.total || 0,
+      totalBalance: totalIncomeAmount - totalExpenseAmount,
+      totalIncome: totalIncomeAmount,
+      totalExpenses: totalExpenseAmount,
+      isExpenseExceeded: totalExpenseAmount > totalIncomeAmount,
       last30DaysExpenses: {
         total: expenseLast30Days,
         transactions: last30DaysExpenseTransactions,
